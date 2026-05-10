@@ -9,10 +9,11 @@ from langgraph.runtime import Runtime
 
 from src.message.user_message import MessagesState, Context
 from src.schema.ai_extraction import UserIntent
+from src.schema.ai_extraction import ExtractedEmail
 from src.utils.formatting import format_history, to_oai_messages
 from src.utils.llm import OpenAISetup, LLM_MODEL
 from src.mock_data import MOCK_CUSTOMERS
-from src.schema.ai_extraction import ExtractedEmail
+
 
 from src.workflow.handle_request import HandleRequestExecutor
 
