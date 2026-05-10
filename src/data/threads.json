@@ -1,0 +1,22 @@
+{
+  "cus_001": {
+    "thread_id": "f35d5ee1-3618-462e-b53b-140486b86407",
+    "last_active": "2026-05-02T08:56:57.281401+00:00"
+  },
+  "thread_id": {
+    "thread_id": "26bb465f-7d31-4d88-aed1-6194eca06cad",
+    "last_active": "2026-05-05T13:43:38.914774+00:00"
+  },
+  "null": {
+    "thread_id": "e253fdeb-51b8-42fa-b10c-e027cf0ba0ce",
+    "last_active": "2026-05-09T11:30:46.687625+00:00"
+  },
+  "cus_002": {
+    "thread_id": "027635dd-b4bd-4cd1-87c8-7f111653ff8f",
+    "last_active": "2026-05-09T05:03:43.088845+00:00"
+  },
+  "null": {
+    "thread_id": "594db9c4-30c8-4201-a45b-ab7bf150a040",
+    "last_active": "2026-05-09T11:35:31.044870+00:00"
+  }
+}

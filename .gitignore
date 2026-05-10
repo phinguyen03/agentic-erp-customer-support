@@ -1,0 +1,47 @@
+# Environment variables
+.env
+.env.*
+
+# AI assistant files
+CLAUDE.md
+claude.md
+
+# uv lock file
+uv.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build / package files
+build/
+dist/
+*.egg-info/
+
+#Docs
+docs/
+
+#Mock data
+src/mock_data.py
