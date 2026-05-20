@@ -24,4 +24,5 @@ class IntentTopic(StrEnum):
     POLICY_QUESTION = "policy_question"
     HUMAN_SUPPORT_REQUEST = "human_support_request"
     USER_EMAIL = "user_email"
+    APPROVAL_STATUS = "approval_status"
     OUT_OF_SCOPE = "out_of_scope"

@@ -82,8 +82,24 @@ class UserReturnRequest(BaseModel):
 
 
 class ExtractedEmail(BaseModel):
-    """email extracted from a customer message for account lookup."""
+    """Email and user-switch signal extracted from conversation context."""
 
     model_config = ConfigDict(extra="forbid")
 
-    email: Annotated[str | None, Field(description="Email of the customer as mentioned in the message. Null if no email is present.", examples=["minh@example.com"])] = None
+    email: Annotated[
+        str | None,
+        Field(
+            description="Email explicitly stated in the latest message. Null if no email present.",
+            examples=["minh@example.com"],
+        ),
+    ] = None
+    is_new_user: Annotated[
+        bool,
+        Field(
+            description=(
+                "True if the latest message indicates a DIFFERENT person than the current identified user "
+                "(e.g. mentions a different name, says 'for my friend', 'for Minh', or provides an email "
+                "that belongs to a different person). False if it's the same user or no user is identified yet."
+            ),
+        ),
+    ] = False

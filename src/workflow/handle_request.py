@@ -1,11 +1,12 @@
 
 import logging
+from datetime import datetime
 
 from src.message.user_message import MessagesState, Context
 from src.utils.formatting import format_history, to_oai_messages
 from src.utils.llm import OpenAISetup, LLM_MODEL
+from src.utils.approval_store import submit_approval
 from src.schema.ai_extraction import UserReturnRequest
-from src.schema.product import Order
 from src.mock_data import MOCK_ORDERS
 
 from langchain_core.messages import AIMessage, HumanMessage
@@ -37,7 +38,7 @@ class HandleRequestExecutor:
         self,
         state: MessagesState,
         runtime: Runtime[Context],
-    ) -> dict:
+    ) -> MessagesState:
         messages = list(state["messages"])
 
         response = await client.beta.chat.completions.parse(
@@ -46,21 +47,56 @@ class HandleRequestExecutor:
             response_format=UserReturnRequest,
         )
         user_request: UserReturnRequest = response.choices[0].message.parsed
-        
+
+        # Normalize LLM hallucinated string "null"/"none" to actual None
+        if user_request.order_id and user_request.order_id.lower() in ("null", "none", "n/a"):
+            user_request.order_id = None
+
         if not user_request.order_id:
             return {"messages": [AIMessage(content="Would you like to give me your order Id, so I can find them?")]}
         
-        #customer_id = runtime.context.user_id
-        order_info: Order = []
+        order_info: list[dict] = []
         for order in MOCK_ORDERS:
             if user_request.order_id == order["order_id"]:
                 order_info.append({
                     "order_date": order["order_date"],
                     "order_status": order["status"],
-                    "order_item": order["items"]
+                    "order_items": order["items"],
+                    "order_id": order["order_id"],
+                    "condition_reported": order["items"][0]["condition_reported"],
+                    "total_amount": order["total_amount"]
                 })
 
         if not order_info:
-            return {"messages": [AIMessage(content=f"You don't have any items related to {user_request.order_id}")]}
-        
-        logging.warning(f"[HANDLEREQUEST] History: {format_history(messages)}, Order items: {order_info}")
+            return {"messages": [AIMessage(content=f"You don't have any items related to {user_request.order_id}")], "conversation_complete": True}
+
+        today = datetime.now().date()
+        order_date = datetime.fromisoformat(order_info[0]["order_date"]).date()
+        order_day_offset = (today - order_date).days
+        if order_day_offset > 30:
+            return {"messages": [AIMessage(content=f"Your order {user_request.order_id} is over 30 days. So you can't return item.")], "conversation_complete": True}
+        elif order_info[0]["condition_reported"] != "good":
+            return {"messages": [AIMessage(content=f"Your order {user_request.order_id} is not in good condition. So you can't return item.")], "conversation_complete": True}
+        elif order_info[0]["total_amount"] >= 50:
+            user_id = state["data"].get("user_id")
+            action = user_request.requested_action.value
+            request_id = submit_approval(
+                user_id=user_id,
+                order_id=user_request.order_id,
+                action=action,
+                amount=order_info[0]["total_amount"],
+            )
+            return {
+                "messages": [AIMessage(content=f"Your {action} request for order {user_request.order_id} (${order_info[0]['total_amount']:.2f}) requires manager approval. Submitted as request #{request_id}. You can ask me for the status anytime.")],
+                "conversation_complete": True,
+            }
+
+        logging.warning(f"[HANDLEREQUEST] History: {format_history(messages)}")
+
+        action = user_request.requested_action.value
+        success_msg = {
+            "return": f"Your return for order {user_request.order_id} has been approved and submitted.",
+            "refund": f"Your refund for order {user_request.order_id} has been approved. Amount returns within 3-5 business days.",
+        }.get(action, f"Your {action} request for order {user_request.order_id} has been processed.")
+
+        return {"messages": [AIMessage(content=success_msg)], "conversation_complete": True}
