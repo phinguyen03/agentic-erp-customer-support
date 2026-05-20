@@ -10,10 +10,11 @@ def merge_dicts(left: dict[str, Any], right: dict[str, Any]) -> dict[str, Any]:
 
 
 class MessagesState(TypedDict):
-    messages: Annotated[list[AnyMessage], operator.add]  
-    data: Annotated[dict[str, Any], merge_dicts]         
-    llm_calls: int                                        
-    need_provide_email: NotRequired[bool]                  
+    messages: Annotated[list[AnyMessage], operator.add]
+    data: Annotated[dict[str, Any], merge_dicts]
+    llm_calls: int
+    need_provide_email: NotRequired[bool]
+    conversation_complete: NotRequired[bool]                  
 
  
 @dataclass
