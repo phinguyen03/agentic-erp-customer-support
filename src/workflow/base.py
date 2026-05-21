@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from dotenv import load_dotenv
 
@@ -214,18 +213,3 @@ def build_graph():
     return workflow.compile(checkpointer=MemorySaver())
 
 graph = build_graph()
-
-
-async def main():
-    from src.app import chat
-    thread_id = None
-    while True:
-        logging.warning("START")
-        message = input()
-        response = await chat(message=message, thread_id=thread_id)
-        thread_id = response.get("thread_id", thread_id)
-        ai_response = response["messages"][-1].content
-        logging.warning("Assistant: %s", ai_response)
-
-if __name__ == "__main__":
-    asyncio.run(main())
