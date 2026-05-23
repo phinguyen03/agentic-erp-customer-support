@@ -21,5 +21,4 @@ class ApprovalStatusNode:
             lines.append(f"Request {a['request_id']}: {a['action']} for order {a['order_id']} (${a['amount']:.2f}) — {status_label}")
 
         msg = "Your approval requests:\n" + "\n".join(lines)
-        logging.warning("[APPROVAL_STATUS] user=%s approvals=%s", user_id, approvals)
         return {"messages": [AIMessage(content=msg)], "conversation_complete": True}

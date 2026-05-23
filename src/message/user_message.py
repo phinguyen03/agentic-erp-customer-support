@@ -14,7 +14,7 @@ class MessagesState(TypedDict):
     data: Annotated[dict[str, Any], merge_dicts]
     llm_calls: int
     need_provide_email: NotRequired[bool]
-    conversation_complete: NotRequired[bool]                  
+    conversation_complete: NotRequired[bool]                
 
  
 @dataclass

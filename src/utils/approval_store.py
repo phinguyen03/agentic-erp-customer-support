@@ -10,7 +10,8 @@ _STORE_PATH = Path(__file__).parent.parent / "data" / "pending_approvals.json"
 def _load() -> dict:
     if not _STORE_PATH.exists():
         return {}
-    return json.loads(_STORE_PATH.read_text(encoding="utf-8"))
+    text = _STORE_PATH.read_text(encoding="utf-8").strip()
+    return json.loads(text) if text else {}
 
 
 def _save(store: dict) -> None:
@@ -20,6 +21,13 @@ def _save(store: dict) -> None:
 
 def submit_approval(user_id: str, order_id: str, action: str, amount: float) -> str:
     store = _load()
+    existing = next(
+        (v for v in store.values() if v["user_id"] == user_id and v["order_id"] == order_id and v["status"] == "pending"),
+        None,
+    )
+    if existing:
+        logging.info("reusing approval %s for user %s order %s", existing["request_id"], user_id, order_id)
+        return existing["request_id"]
     request_id = str(uuid4())[:8]
     store[request_id] = {
         "request_id": request_id,

@@ -1,9 +1,8 @@
 from typing import Annotated, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from src.enum.product import ProductCondition
 from src.enum.request import IntentTopic, EmotionalTone, RequestedAction
-
 
 
 class UserIntent(BaseModel):
@@ -14,12 +13,12 @@ class UserIntent(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     topic: Annotated[
-        IntentTopic,
+        IntentTopic | None,
         Field(
             description="Primary topic/intention of the customer's latest message.",
             examples=["exchange_request"],
         ),
-    ]
+    ] = None
 
 
 class UserReturnRequest(BaseModel):
@@ -37,10 +36,7 @@ class UserReturnRequest(BaseModel):
 
     order_id: Annotated[
         str | None,
-        Field(
-            description="Order ID mentioned by the customer. If user does not provide order id -> null",
-            examples=["ord_1001"],
-        ),
+        Field(description="Order ID from the conversation (format: ord_XXXX)."),
     ] = None
     requested_action: Annotated[
         RequestedAction,
@@ -80,26 +76,7 @@ class UserReturnRequest(BaseModel):
         ),
     ]
 
-
-class ExtractedEmail(BaseModel):
-    """Email and user-switch signal extracted from conversation context."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    email: Annotated[
-        str | None,
-        Field(
-            description="Email explicitly stated in the latest message. Null if no email present.",
-            examples=["minh@example.com"],
-        ),
-    ] = None
-    is_new_user: Annotated[
-        bool,
-        Field(
-            description=(
-                "True if the latest message indicates a DIFFERENT person than the current identified user "
-                "(e.g. mentions a different name, says 'for my friend', 'for Minh', or provides an email "
-                "that belongs to a different person). False if it's the same user or no user is identified yet."
-            ),
-        ),
-    ] = False
+    @field_validator("requested_action", "emotional_tone", mode="before")
+    @classmethod
+    def strip_quotes(cls, v):
+        return v.strip('"') if isinstance(v, str) else v

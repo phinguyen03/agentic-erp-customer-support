@@ -11,7 +11,8 @@ _STORE_PATH = Path(__file__).parent.parent / "data" / "threads.json"
 def _load() -> dict:
     if not _STORE_PATH.exists():
         return {}
-    return json.loads(_STORE_PATH.read_text(encoding="utf-8"))
+    text = _STORE_PATH.read_text(encoding="utf-8").strip()
+    return json.loads(text) if text else {}
 
 
 def _save(store: dict) -> None:

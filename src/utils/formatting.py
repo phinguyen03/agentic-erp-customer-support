@@ -11,8 +11,8 @@ def format_history(messages: list[BaseMessage]) -> str:
     return "\n".join(parts)
 
 
-def to_oai_messages(messages, system_prompt: str) -> list[dict]:
-    result = [{"role": "system", "content": system_prompt}]
+def to_oai_messages(messages) -> list[dict]:
+    result = []
     for msg in messages:
         if isinstance(msg, HumanMessage):
             result.append({"role": "user", "content": msg.content})
