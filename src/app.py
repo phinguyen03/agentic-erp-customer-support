@@ -1,11 +1,14 @@
 import asyncio
+import json
 import logging
 from uuid import uuid4
-
-from fastapi import FastAPI
-from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel, Field
 from typing import Annotated
+
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+
+from langchain_core.messages import AIMessage, HumanMessage
 
 from src.message.user_message import Context
 from src.mock_data import MOCK_CUSTOMERS
@@ -68,6 +71,43 @@ async def chat_endpoint(req: ChatRequest) -> ChatResponse:
     result = await chat(message=req.message, email_input=req.email)
     ai_message = result["messages"][-1].content
     return ChatResponse(message=ai_message)
+
+
+@app.post("/api/v1/chat/stream")
+async def chat_stream_endpoint(req: ChatRequest):
+    user_info = _identify_user(req.email)
+    if not user_info:
+        async def err():
+            yield f"data: {json.dumps({'type': 'message', 'content': 'Your information is not in our system.'})}\n\n"
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(content=err(), media_type="text/event-stream")
+
+    user_id, user_name = user_info
+    existing = load_thread(user_id)
+    thread_id = existing or str(uuid4())
+    if not existing:
+        save_thread(user_id, thread_id)
+
+    set_log_context(thread_id=thread_id, user_id=user_id)
+    context = Context(user_id=user_id, user_name=user_name)
+
+    async def generate():
+        async for chunk in graph.astream(
+            {"messages": [HumanMessage(content=req.message)]},
+            context=context,
+            config={"configurable": {"thread_id": thread_id}},
+        ):
+            for update in chunk.values():
+                if "messages" in update:
+                    for msg in update["messages"]:
+                        if isinstance(msg, AIMessage) and msg.content:
+                            yield f"data: {json.dumps({'type': 'message', 'content': msg.content})}\n\n"
+                if "data" in update:
+                    yield f"data: {json.dumps({'type': 'data', 'payload': update['data']})}\n\n"
+                       
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(content=generate(), media_type="text/event-stream")
 
 
 async def main():

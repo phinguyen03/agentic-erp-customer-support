@@ -1,6 +1,6 @@
 ﻿import os
-from typing import Type, TypeVar
 import logging
+from typing import Type, TypeVar
 
 import anthropic
 from dotenv import load_dotenv
