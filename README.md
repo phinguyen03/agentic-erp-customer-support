@@ -71,7 +71,7 @@ Customer Message
 uv sync
 
 # add .env
-ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_API_KEY=...
 ANTHROPIC_DEFAULT_SONNET_MODEL=claude-sonnet-4-5
 
 # run CLI
