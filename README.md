@@ -44,7 +44,6 @@ Customer Message
 ### Manager Approval
 - Approval requests stored in `src/data/pending_approvals.json`
 - Customers can query approval status mid-conversation
-- `decide()` utility for manager approve/decline actions
 
 ### Streaming (SSE)
 - `/api/v1/chat/stream` endpoint streams responses as each graph node completes
