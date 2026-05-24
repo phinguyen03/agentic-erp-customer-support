@@ -105,7 +105,7 @@ async def chat_stream_endpoint(req: ChatRequest):
                 if "data" in update:
                     yield f"data: {json.dumps({'type': 'data', 'payload': update['data']})}\n\n"
                        
-        yield "data: [DONE]\n\n"
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
     return StreamingResponse(content=generate(), media_type="text/event-stream")
 
