@@ -6,9 +6,6 @@
 CLAUDE.md
 claude.md
 
-# uv lock file
-uv.lock
-
 # Python
 __pycache__/
 *.py[cod]
