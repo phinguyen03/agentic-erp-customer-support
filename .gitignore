@@ -46,6 +46,5 @@ docs/
 #Mock data
 src/mock_data.py
 
-#Infra
-Dockerfile
-.dockerignore
+#Frontend
+frontend/
