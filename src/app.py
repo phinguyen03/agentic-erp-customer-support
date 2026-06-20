@@ -7,6 +7,7 @@ from typing import Annotated
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_core.messages import AIMessage, HumanMessage
 
@@ -17,6 +18,14 @@ from src.utils.thread_store import load_thread, save_thread
 from src.workflow.base import graph
 
 app = FastAPI(title="Agentic ERP Customer Support")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://idyllic-muffin-4045cb.netlify.app/"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ChatRequest(BaseModel):
